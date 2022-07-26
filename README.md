@@ -1,2 +1,2 @@
-# marketplace
-The API for a simple classified ads website used for buying and selling used goods locally.
+# marketplace-api
+The API for a simple classified ads website for buying and selling used goods locally.
