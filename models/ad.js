@@ -1,25 +1,19 @@
 let mongoose = require('mongoose');
 let Schema = mongoose.Schema;
-let pointSchema = require('./point')
+let PointSchema = require('./point')
 
 let AdSchema = new Schema(
     {
         title: {type: String, required: true, maxLength:100},
         seller: {type: Schema.Types.ObjectId, ref: 'Seller', required: true},
-        location: {type: pointSchema, required: true},
-        price: {type: Integer, required: true},
+        location: {type: PointSchema, required: true},
+        price: {type: Number, required: true, min: 0},
         description: {type: String, maxLength:500},
         category: [{type: Schema.Types.ObjectId, ref: 'Category'}],
-        imageUrl: {type: String}
+        imageUrl: {type: String},
+        condition: {type: String, enum:['Brand new', 'Like new', 'Very good', 'Good', 'Acceptable', 'For parts/Not working'], required: true}
     }
 )
-
-// Virtual for ad's URL
-AdSchema
-.virtual('url')
-.get(function () {
-    return '/api/ad/' + this._id;
-});
 
 // Export model
 module.exports = mongoose.model('Ad', AdSchema);

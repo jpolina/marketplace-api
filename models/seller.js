@@ -1,21 +1,15 @@
-var mongoose = require('mongoose');
+let mongoose = require('mongoose');
 
-var Schema = mongoose.Schema;
+let Schema = mongoose.Schema;
 
-var SellerSchema = new Schema(
+let SellerSchema = new Schema(
     {
-        name: {type: String, required: true, maxLength: 100},
-        email: {type: String, required: true, maxLength: 100},
+        name: {type: String,required: [true, 'Please add a name'], maxLength: [100, 'Name is too long']},
+        email: {type: String, required: [true, 'Please add an email'], maxLength: [100, 'Email is too long']},
         phone: {type: String, maxLength: 100},
+        password: {type: String, required: [true, 'Please add a password'], maxLength: [100, 'Password is too long']}
     }
 )
-
-// Virtual for seller's URL
-SellerSchema
-.virtual('url')
-.get(function () {
-    return '/api/seller/' + this._id;
-});
 
 // Export model
 module.exports = mongoose.model('Seller', SellerSchema);

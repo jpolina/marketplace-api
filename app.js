@@ -12,11 +12,10 @@ let db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB connection error'));
 
 
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
-var apiRouter = require('./routes/api')
+let indexRouter = require('./routes/index');
+let apiRouter = require('./routes/api')
 
-var app = express();
+let app = express();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));

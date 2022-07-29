@@ -2,7 +2,7 @@ let mongoose = require('mongoose');
 
 let Schema = mongoose.Schema;
 
-const pointSchema = new mongoose.Schema(
+const PointSchema = new mongoose.Schema(
     {
         type: {
             type: String,
@@ -17,5 +17,5 @@ const pointSchema = new mongoose.Schema(
 );
 
 
-// Export model
-module.exports = mongoose.model('Category', CategorySchema);
+// Export schema
+module.exports = PointSchema;

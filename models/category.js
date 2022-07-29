@@ -8,12 +8,5 @@ let CategorySchema = new Schema(
     }
 )
 
-// Virtual for category's URL
-CategorySchema
-.virtual('url')
-.get(function() {
-    return '/api/category/' + this._id;
-});
-
 // Export model
 module.exports = mongoose.model('Category', CategorySchema);
