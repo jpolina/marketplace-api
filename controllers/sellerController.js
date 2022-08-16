@@ -27,9 +27,12 @@ exports.seller_register = [
         const errors = validationResult(req);
         let {name,email, phone, password} = req.body;
         if (!phone) {phone=false};
+
         const sellerExists = await Seller.findOne({email})
+
         if(sellerExists) {
-            return res.status(400).json({error:'Email is already in use.',email:email})
+            return res.status(400).json({message:'This email is already in use'})
+            
         }
 
         // Hash password
@@ -56,8 +59,7 @@ exports.seller_register = [
                 token: generateToken(seller._id)
             })
         } else {
-            res.status(400)
-            throw new Error('Invalid account data')
+            res.status(400).json({message: 'Invalid account data'})
         }
 
     })
@@ -71,6 +73,7 @@ exports.seller_login = asyncHandler(async(req, res, next) => {
 
     if(seller && (await bcrypt.compare(password, seller.password))) {
         res.status(200).json({
+            message: 'Logged in successfully',
             _id: seller.id,
             name: seller.name,
             email: seller.email,
@@ -78,8 +81,7 @@ exports.seller_login = asyncHandler(async(req, res, next) => {
             token: generateToken(seller._id)
         })
     } else {
-        res.status(400)
-        throw new Error('Invalid credentials')
+        res.status(400).json({message:'Invalid credentials'})
     }
 })
 
@@ -142,8 +144,7 @@ exports.seller_update = [
                 seller: updatedSeller
             })
         } else {
-            res.status(400)
-            throw new Error('Invalid account data')
+            res.status(400).json({message: 'Invalid account data'})
         }
 
     })
@@ -155,7 +156,7 @@ exports.seller_detail = function(req, res, next) {
             Seller.findById(req.params.id).exec(callback)
         },
         ads: function(callback) {
-            Ad.find({'seller': req.params.id}).exec(callback)
+            Ad.find({'seller': req.params.id}).populate('seller').populate('category').exec(callback)
         }
     }, function (err, results) {
         if (err) {return next(err);}

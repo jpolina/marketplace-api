@@ -7,6 +7,8 @@ let seller_controller = require('../controllers/sellerController')
 let category_controller = require('../controllers/categoryController')
 
 const {protect} = require('../middleware/authMiddleware')
+let { generateUploadURL } = require('./s3.js')
+
 
 
 /// AD ROUTES ///
@@ -67,6 +69,15 @@ router.get('/category/:id', category_controller.category_detail);
 
 // GET request for list of all category.
 router.get('/categories', category_controller.category_list);
+
+
+
+/// S3 ROUTE ///
+
+router.get('/s3Url', async (req, res)=> {
+    const url = await generateUploadURL()
+    res.send({url})
+})
 
 
 module.exports = router;

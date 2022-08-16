@@ -59,7 +59,7 @@ exports.category_update = [
     async (req, res, next) => {
         const errors = validationResult(req);
 
-        if (!errors.isEmpty()) return res.json({ errors: errors.array() });
+        if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array(), message:errors.array()[0] });
 
         try {
             const category = await Category.findById(req.params.id);
@@ -73,7 +73,7 @@ exports.category_update = [
                 category: updatedCategory,
             });
         } catch (error) {
-            return res.status(500).json({ error: error.message });
+            return res.status(500).json({ message: error.message });
         }
     }
 ]
@@ -99,7 +99,7 @@ exports.category_detail = function(req, res, next) {
 
 exports.category_list = function(req, res, next) {
     try{
-        Category.find(null, null, {limit:10})
+        Category.find()
         .sort({name : 1})
         .exec(function(err, list_categories) {
             if (err) {return next(err)}

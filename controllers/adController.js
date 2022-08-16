@@ -22,25 +22,29 @@ exports.index = function(req, res, next) {
 }
 
 exports.ad_post = [
-    (req, res, next) => {
-        if(!(req.body.category instanceof Array)){
-            if(typeof req.body.category==='undefined'){
-                req.body.category=[];
-            } else {
-                req.body.category = new Array(req.body.category);
-            }
-        }
-        next();
-    },
+    // (req, res, next) => {
+    //     if(!(req.body.category instanceof Array)){
+    //         if(typeof req.body.category==='undefined'){
+    //             req.body.category=[];
+    //         } else {
+    //             req.body.category = new Array(req.body.category);
+    //         }
+    //     }
+    //     next();
+    // },
     body('title', 'Title must not be empty.').trim().isLength({ min: 1 }).escape(),
-    body('location.coordinates.*').escape(),
+    body('location.coordinates.*').optional({checkFalsy: true}).escape(),
     body('price', 'Price must not be empty').trim().isLength({ min: 1 }).escape(),
     body('description', 'Description must not be empty.').trim().isLength({ min: 1 }).escape(),
-    body('category.*').escape(),
+    // body('category.*').escape(),
     body('imageUrl').isURL().withMessage('is invalid'),
     body('condition', 'Condition must not be empty.').trim().isLength({ min: 1 }).escape(),
 
     asyncHandler(async (req,res,next) => {
+        const category = await Category.findOne({name:req.body.category})
+        if(!category) {
+            res.status(400).json({message:'Category not found'})
+        }
         const errors = validationResult(req);
         if(!req.seller) {return res.json({message:"Seller not found"})}
         const ad = await Ad.create(
@@ -50,14 +54,15 @@ exports.ad_post = [
                 location: req.body.location,
                 price: req.body.price,
                 description: req.body.description,
-                category: req.body.category,
+                category: category.id,
                 imageUrl: req.body.imageUrl,
                 condition: req.body.condition,
             }
         )
         if (!errors.isEmpty()) {
-            return res.status(400);
-        } else if (ad) {
+            return res.status(400).json({message:'Invalid input data'})
+        } else 
+        if (ad) {
             res.status(201).json({
                 message:'Ad created successfully',
                 _id: ad.id,
@@ -71,8 +76,7 @@ exports.ad_post = [
                 condition: ad.condition,
             })
         } else {
-            res.status(400)
-            throw new Error('Invalid account data')
+            res.status(400).json({message:'Invalid account data'})
         }
     })
 ]
@@ -107,7 +111,7 @@ exports.ad_update = [
         next();
     },
     body('title', 'Title must not be empty.').trim().isLength({ min: 1 }).escape(),
-    body('location.coordinates.*').escape(),
+    body('location.coordinates.*').optional({checkFalsy: true}).escape(),
     body('price', 'Price must not be empty').trim().isLength({ min: 1 }).escape(),
     body('description', 'Description must not be empty.').trim().isLength({ min: 1 }).escape(),
     body('category.*').escape(),
@@ -116,22 +120,25 @@ exports.ad_update = [
 
     asyncHandler(async (req,res,next) => {
         try{
-
             const errors = validationResult(req);
 
             if (!errors.isEmpty()) {
                 return res.status(400).json({errors:errors});
             }
 
+            const category = await Category.findOne({name:req.body.category})
+            if(!category) {
+                return res.status(404).json({message: 'Category not found'})
+            }
             const ad = await Ad.findById(req.params.id);
             if(!ad) return res.status(404).json({message: 'Ad not found'})
             if (ad.seller!=req.seller.id) return res.status(401).json({message:'You can only edit your own ads.'});
-            const {title, location, price, description, category, imageUrl, condition} = req.body;
+            const {title, location, price, description, imageUrl, condition} = req.body;
             ad.title = title;
             ad.location = location;
             ad.price = price;
             ad.description = description;
-            ad.category = category;
+            ad.category = category.id;
             ad.imageUrl = imageUrl;
             ad.condition = condition;
 
@@ -143,8 +150,7 @@ exports.ad_update = [
                     ad:updatedAd
                 })
             } else {
-                return res.status(400)
-                throw new Error('Invalid account data')
+                return res.status(400).json({message: 'Invalid account data'})
             }
         } catch (err) {
             return res.status(500).json({error:err})
