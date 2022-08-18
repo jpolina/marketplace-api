@@ -16,7 +16,7 @@ const s3 = new aws.S3({
     signatureVersion: 'v4'
 })
 
-exports.generateUploadURL = async () => {
+const generateUploadURL = async () => {
     const rawBytes = await randomBytes(16)
     const imageName = rawBytes.toString('hex')
 
@@ -27,4 +27,9 @@ exports.generateUploadURL = async () => {
     })
 
     return await s3.getSignedUrlPromise('putObject', params)
+}
+
+exports.s3_url = async (req, res) => {
+    const url = await generateUploadURL()
+    res.send({url})
 }

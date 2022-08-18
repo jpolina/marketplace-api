@@ -5,9 +5,12 @@ let router = express.Router();
 let ad_controller = require('../controllers/adController')
 let seller_controller = require('../controllers/sellerController')
 let category_controller = require('../controllers/categoryController')
+let s3_controller = require('../controllers/s3Controller')
+let geocoding_controller = require('../controllers/geocodingController')
+
 
 const {protect} = require('../middleware/authMiddleware')
-let { generateUploadURL } = require('./s3.js')
+let { generateUploadURL } = require('../controllers/s3Controller.js')
 
 
 
@@ -74,10 +77,14 @@ router.get('/categories', category_controller.category_list);
 
 /// S3 ROUTE ///
 
-router.get('/s3Url', async (req, res)=> {
-    const url = await generateUploadURL()
-    res.send({url})
-})
+router.get('/s3Url', s3_controller.s3_url)
+
+
+/// POSITION STACK API ///
+
+router.get('/forwardgeocode', geocoding_controller.forwardgeocode)
+router.get('/reversegeocode', geocoding_controller.reversegeocode)
+
 
 
 module.exports = router;

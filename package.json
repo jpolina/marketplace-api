@@ -10,6 +10,7 @@
   "dependencies": {
     "async": "^3.2.4",
     "aws-sdk": "^2.1195.0",
+    "axios": "^0.27.2",
     "bcryptjs": "^2.4.3",
     "cookie-parser": "~1.4.4",
     "debug": "~2.6.9",

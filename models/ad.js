@@ -7,6 +7,7 @@ let AdSchema = new Schema(
         title: {type: String, required: true, maxLength:100},
         seller: {type: Schema.Types.ObjectId, ref: 'Seller', required: true},
         location: {type: PointSchema},
+        address: {type: String, maxLength: 100},
         price: {type: Number, required: true, min: 0},
         description: {type: String, maxLength:500},
         category: {type: Schema.Types.ObjectId, ref: 'Category'},
