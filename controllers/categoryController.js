@@ -26,7 +26,7 @@ exports.category_post = [
                 .json({ message: "Succesfully created category", category: savedCategory });
             }
             } catch (e) {
-            return res.status(500).json({ error: e.message });
+            return res.status(500).json({ message: e.message });
         }
     }
 ]
@@ -49,7 +49,7 @@ exports.category_delete = async (req, res, next) => {
                 .json({ message: "Successfully deleted category", category: deletedCategory });
         }
     } catch (e) {
-        return res.status(500).json({ error: e.message });
+        return res.status(500).json({ message: e.message });
     }
 }
 
@@ -58,8 +58,7 @@ exports.category_update = [
 
     async (req, res, next) => {
         const errors = validationResult(req);
-
-        if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array(), message:errors.array()[0] });
+        if (!errors.isEmpty()) return res.status(400).json({ message:'Invalid input data' });
 
         try {
             const category = await Category.findById(req.params.id);

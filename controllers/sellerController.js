@@ -25,6 +25,10 @@ exports.seller_register = [
 
     asyncHandler(async (req,res,next) => {
         const errors = validationResult(req);
+
+        if (!errors.isEmpty()) {
+            return res.status(400).json({message:'Invalid input data'});
+        }
         let {name,email, phone, password} = req.body;
         if (!phone) {phone=false};
 
@@ -47,9 +51,7 @@ exports.seller_register = [
             }
         )
 
-        if (!errors.isEmpty()) {
-            return res.status(400);
-        }else if (seller) {
+        if (seller) {
             res.status(201).json({
                 message: "Account created successfuly",
                 _id: seller.id,
@@ -125,6 +127,10 @@ exports.seller_update = [
         }
         if (req.params.id != req.seller.id) return res.status(401).json({message:"You can only edit your own account"})
 
+        if (!errors.isEmpty()) {
+            return res.status(400).json({message:'Invalid input data'});
+        }
+
         // Hash password
         const salt = await bcrypt.genSalt(10)
         const hashedPassword = await bcrypt.hash(password,salt)
@@ -135,9 +141,7 @@ exports.seller_update = [
 
         const updatedSeller = await seller.save();
 
-        if (!errors.isEmpty()) {
-            return res.status(400);
-        } else if (seller) {
+        if (seller) {
             res.status(201).json({
                 message: "Profile updated successfuly",
                 token: generateToken(updatedSeller._id),

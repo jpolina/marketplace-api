@@ -42,6 +42,10 @@ exports.ad_post = [
         }
 
         const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({message:'Invalid input data'})
+        }
+
         if(!req.seller) {return res.status(404).json({message:"Seller not found"})}
 
         const addressArray = []
@@ -53,9 +57,6 @@ exports.ad_post = [
         const address = addressArray.join(', ')
         const coordinates = await geocoding_controller.geocode(address)
         let location = '';
-
-        // location = {"type":"Point", "coordinates":[-79.705032, 43.617047]};
-
 
         if (coordinates) {location = {"type":"Point", "coordinates":coordinates}}
 
@@ -72,9 +73,6 @@ exports.ad_post = [
                 condition: req.body.condition,
             }
         )
-        if (!errors.isEmpty()) {
-            return res.status(400).json({message:'Invalid input data'})
-        } else 
         if (ad) {
             return res.status(201).json({
                 message:'Ad created successfully',
@@ -107,27 +105,19 @@ exports.ad_delete = asyncHandler(async (req, res, next) => {
         }
         return res.status(500).json({message: 'An error occurred'});
     } catch (e) {
-        return res.status(500).json({error:e.message});
+        return res.status(500).json({message:e.message});
     }
     
 })
 
 exports.ad_update = [
-    (req, res, next) => {
-        if(!(req.body.category instanceof Array)){
-            if(typeof req.body.category==='undefined'){
-                req.body.category=[];
-            } else {
-                req.body.category = new Array(req.body.category);
-            }
-        }
-        next();
-    },
     body('title', 'Title must not be empty.').trim().isLength({ min: 1 }).escape(),
-    body('location.coordinates.*').optional({checkFalsy: true}).escape(),
+    body('address').optional({checkFalsy: true}).escape(),
+    body('city').optional({checkFalsy: true}).escape(),
+    body('state').optional({checkFalsy: true}).escape(),
+    body('zip').optional({checkFalsy: true}).escape(),
     body('price', 'Price must not be empty').trim().isLength({ min: 1 }).escape(),
     body('description', 'Description must not be empty.').trim().isLength({ min: 1 }).escape(),
-    body('category.*').escape(),
     body('imageUrl').isURL().withMessage('is invalid'),
     body('condition', 'Condition must not be empty.').trim().isLength({ min: 1 }).escape(),
 
@@ -136,19 +126,33 @@ exports.ad_update = [
             const errors = validationResult(req);
 
             if (!errors.isEmpty()) {
-                return res.status(400).json({errors:errors});
+                return res.status(400).json({message:errors[0]});
             }
 
             const category = await Category.findOne({name:req.body.category})
             if(!category) {
                 return res.status(404).json({message: 'Category not found'})
             }
+
+            const addressArray = []
+            if (req.body.address) addressArray.push(req.body.address)
+            if (req.body.city) addressArray.push(req.body.city)
+            if (req.body.state) addressArray.push(req.body.state)
+            if (req.body.zip) addressArray.push(req.body.zip)
+            
+            const address = addressArray.join(', ')
+            const coordinates = await geocoding_controller.geocode(address)
+            let location;
+
+            if (coordinates) {location = {"type":"Point", "coordinates":coordinates}}
+
             const ad = await Ad.findById(req.params.id);
             if(!ad) return res.status(404).json({message: 'Ad not found'})
             if (ad.seller!=req.seller.id) return res.status(401).json({message:'You can only edit your own ads.'});
-            const {title, location, price, description, imageUrl, condition} = req.body;
+            const {title, price, description, imageUrl, condition} = req.body;
             ad.title = title;
             ad.location = location;
+            ad.address = address;
             ad.price = price;
             ad.description = description;
             ad.category = category.id;
@@ -166,7 +170,7 @@ exports.ad_update = [
                 return res.status(400).json({message: 'Invalid account data'})
             }
         } catch (err) {
-            return res.status(500).json({error:err})
+            return res.status(500).json({message:err})
         }
     })
 ]
