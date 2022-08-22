@@ -191,7 +191,7 @@ exports.ad_detail = function(req, res, next) {
     })
 }
 
-exports.ad_list = function(req, res, next) {
+exports.ad_list = (req, res, next) => {
     Ad.find({})
       .sort({title : 1})
       .populate('seller')
@@ -200,7 +200,84 @@ exports.ad_list = function(req, res, next) {
         if (err) {return next(err)}
         else {
             // Successful, so render
-            res.status(200).json(list_ads)
+            return res.status(200).json(list_ads)
         }
       })
 }
+
+exports.ad_search = [
+    body('keyword').optional({checkFalsy: true}).escape(),
+    body('category').optional({checkFalsy: true}).escape(),
+    body('condition').optional({checkFalsy: true}).escape(),
+    body('location').optional({checkFalsy: true}).escape(),
+    body('minPrice').optional({checkFalsy: true}).escape(),
+    body('maxPrice').optional({checkFalsy: true}).escape(),
+
+    asyncHandler(async (req, res) => {
+        const errors = validationResult(req)
+        if (!errors.isEmpty()) {
+            return res.status(400).json({message:"Invalid input data"})
+        }
+
+        console.log(req.body)
+
+        const {keyword, condition, location, distance, minPrice, maxPrice} = req.body
+
+        const query = {title:{$regex:keyword.trim(), '$options':'i'}}
+        
+
+        if (req.body.category != 'Any Category') {
+            const category = await Category.findOne({name:req.body.category})
+            if(!category) {
+                return res.status(400).json({message:'Category not found'})
+            }
+            query['category']=category.id
+        }
+        
+        
+        if (condition!='Any Condition') query['condition']=condition;
+
+        // LOCATION QUERY
+        if (location != '') {
+            try{
+            const coordinates = await geocoding_controller.geocode(location)
+            if (coordinates) {
+                query['location'] = { $near:
+                    {
+                        $geometry: { type: "Point",  coordinates: coordinates },
+                        $minDistance: 0,
+                        $maxDistance: distance*1000
+                    }
+                }
+            } else {
+                return res.status(400).json({message:'Location is invalid'})
+            }} catch (err) {
+                console.log(err)
+            }
+            
+        }
+        
+
+        if (minPrice != '' && maxPrice != '') query['price']={$gte:Number(minPrice)*100,$lte:Number(maxPrice)*100}
+        else if (minPrice != '') {query['price']= {$gte:Number(minPrice)*100}}
+        else if (maxPrice != '') {query['price']= {$lte:Number(maxPrice)*100}}
+
+        try {
+            Ad.find(query)
+            .sort({title : 1})
+            .populate('seller')
+            .populate('category')
+            .exec(function(err, list_ads) {
+                if (err) {return res.status(500).json(err)}
+                else {
+                    // Successful, so render
+                    return res.status(200).json(list_ads)
+
+                }
+        })
+        } catch (err) {
+            console.log(err)
+            return res.status(500).json({message:err})
+        }
+    })
+]

@@ -34,6 +34,9 @@ router.get('/ad/:id', ad_controller.ad_detail);
 // GET request for list of all ads.
 router.get('/ads', ad_controller.ad_list);
 
+// GET request for searching for certain ads.
+router.post('/ads/search', ad_controller.ad_search)
+
 
 /// SELLER ROUTES ///
 
