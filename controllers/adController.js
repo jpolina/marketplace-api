@@ -192,17 +192,32 @@ exports.ad_detail = function(req, res, next) {
 }
 
 exports.ad_list = (req, res, next) => {
-    Ad.find({})
-      .sort({title : 1})
-      .populate('seller')
-      .populate('category')
-      .exec(function(err, list_ads) {
-        if (err) {return next(err)}
-        else {
-            // Successful, so render
-            return res.status(200).json(list_ads)
-        }
-      })
+    if ('limit' in req.query) {
+        Ad.find({})
+        .limit(Number(req.query.limit))
+        .sort({title : 1})
+        .populate('seller')
+        .populate('category')
+        .exec(function(err, list_ads) {
+            if (err) {return next(err)}
+            else {
+                // Successful, so render
+                return res.status(200).json(list_ads)
+            }
+        })
+    } else {
+        Ad.find({})
+        .sort({title : 1})
+        .populate('seller')
+        .populate('category')
+        .exec(function(err, list_ads) {
+          if (err) {return next(err)}
+          else {
+              // Successful, so render
+              return res.status(200).json(list_ads)
+          }
+        })
+    }
 }
 
 exports.ad_search = [
