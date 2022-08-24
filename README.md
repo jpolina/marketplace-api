@@ -1,2 +1,2 @@
 # marketplace-api
-The API for a simple classified ads website for buying and selling used goods locally.
+This is a the front end for a generic classified ads website where users can browse ads by category, condition, location, and price. Also, users can create an account to post, edit, and delete their ads and create, edit and delete categories. This project was created using the MERN stack, Redux for user login, Mongoose, JWT, and AWS S3 for storing images.

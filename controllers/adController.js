@@ -234,8 +234,6 @@ exports.ad_search = [
             return res.status(400).json({message:"Invalid input data"})
         }
 
-        console.log(req.body)
-
         const {keyword, condition, location, distance, minPrice, maxPrice} = req.body
 
         const query = {title:{$regex:keyword.trim(), '$options':'i'}}
@@ -267,7 +265,7 @@ exports.ad_search = [
             } else {
                 return res.status(400).json({message:'Location is invalid'})
             }} catch (err) {
-                console.log(err)
+                return res.status(500).json({message: err})
             }
             
         }
@@ -291,7 +289,6 @@ exports.ad_search = [
                 }
         })
         } catch (err) {
-            console.log(err)
             return res.status(500).json({message:err})
         }
     })
