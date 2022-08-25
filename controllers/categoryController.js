@@ -83,7 +83,10 @@ exports.category_detail = function(req, res, next) {
             Category.findById(req.params.id).exec(callback)
         },
         ads: function(callback) {
-            Ad.find({'category': req.params.id}).exec(callback)
+            Ad.find({'category': req.params.id})
+            .populate('seller')
+            .populate('category')
+            .exec(callback)
         }
     }, function (err, results) {
         if (err) {return next(err);}
