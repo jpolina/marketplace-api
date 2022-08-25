@@ -53,12 +53,15 @@ exports.ad_post = [
         if (req.body.city) addressArray.push(req.body.city)
         if (req.body.state) addressArray.push(req.body.state)
         if (req.body.zip) addressArray.push(req.body.zip)
-        
         const address = addressArray.join(', ')
-        const coordinates = await geocoding_controller.geocode(address)
+        
         let location = '';
 
-        if (coordinates) {location = {"type":"Point", "coordinates":coordinates}}
+        if (req.body.address || req.body.city || req.body.state || req.body.zip) {
+            const coordinates = await geocoding_controller.geocode(address)
+            if (coordinates) {location = {"type":"Point", "coordinates":coordinates}}
+        }
+        
 
         const ad = await Ad.create(
             {
