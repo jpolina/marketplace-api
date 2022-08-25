@@ -6,6 +6,7 @@ let cookieParser = require('cookie-parser');
 let logger = require('morgan');
 const compression = require('compression');
 const helmet = require('helmet')
+const cors = require('cors')
 
 let mongoose = require('mongoose')
 let mongoDB = process.env.CONNECTION_STRING;
@@ -25,6 +26,7 @@ app.use(helmet())
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 
+app.use(cors())
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
